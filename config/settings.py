@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'message.apps.MessageConfig',
+    'user.apps.UserConfig',
+    'group.apps.GroupConfig'
 ]
 
 MIDDLEWARE = [
