@@ -1,3 +1,5 @@
 from django.db import models
 
-# Create your models here.
+class Message(models.Model):
+    msgId = models.AutoField(primary_key=True)
+    msg = models.CharField(max_length=100)
