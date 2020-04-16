@@ -1,11 +1,12 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from rest_framework.response import Response
 from rest_framework import viewsets
 
-from .serializers import UserSerializer
+from .serializers import UserSerializer, GroupSerializer
 
 from user.models import User
+from group.models import Group
 
 
 class LoginViewSet(viewsets.ModelViewSet) :
@@ -29,3 +30,20 @@ class LoginViewSet(viewsets.ModelViewSet) :
         jsondata['user_id'] = user.values_list('user_id', flat=True)[0]
         jsondata['user_name'] = user.values_list('user_name', flat=True)[0]
         return JsonResponse(jsondata)
+
+class GroupViewSet(viewsets.ModelViewSet) :
+    serializer_class = GroupSerializer
+    queryset = Group.objects.all()
+
+    def create(self, request, *args, **kwargs) :
+        data = {}
+        user_id = User.objects.filter(user_name=request.data['user_name']).values_list('user_id', flat=True)[0]
+        data['group_name'] = request.data['group_name']
+        data['group_users'] = [user_id]
+        try :
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True) 
+            self.perform_create(serializer)
+            return HttpResponse("created")
+        except Exception as e :
+            return HttpResponseBadRequest(str(e))
