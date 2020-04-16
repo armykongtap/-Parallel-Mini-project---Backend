@@ -7,3 +7,15 @@ from drf_writable_nested.serializers import WritableNestedModelSerializer
 from drf_writable_nested.mixins import UniqueFieldsMixin, NestedUpdateMixin
 
 # Import App Models
+from user.models import User
+
+class UserSerializer(serializers.ModelSerializer) :
+    class Meta :
+        model = User
+        fields = '__all__'
+
+    def create(self, validated_data) :
+        name = validated_data.pop('user_name')
+        newuser = User.objects.create(user_name=name)
+        newuser.save()
+        return newuser

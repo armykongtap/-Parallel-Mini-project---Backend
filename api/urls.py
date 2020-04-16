@@ -1,6 +1,9 @@
 from django.urls import path, include
-from .views import hello
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    path('hello/', hello),
-]
+from .views import hello, LoginViewSet
+
+router = DefaultRouter()
+router.register(r'login', LoginViewSet, basename='login')
+
+urlpatterns = router.urls
