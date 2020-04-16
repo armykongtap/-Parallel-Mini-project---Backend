@@ -14,7 +14,7 @@ class LoginViewSet(viewsets.ModelViewSet) :
 
     def create(self, request, *args, **kwargs) :
         data = {}
-        username = request.query_params.get('user')
+        username = request.data['user_name']
         data['user_name'] = username
 
         #Register Case
