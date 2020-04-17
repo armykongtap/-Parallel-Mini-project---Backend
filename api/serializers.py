@@ -27,6 +27,11 @@ class GroupSerializer(serializers.ModelSerializer) :
     
     def create(self, validated_data) :
         newgroup = Group.objects.create(group_name=validated_data.pop('group_name'))
-        newgroup.group_users.set(validated_data.pop('group_users'))
+        user = validated_data.pop('group_users')
+        newgroup.group_users.set(user)
         newgroup.save()
+        user[0].user_group.add(newgroup)
         return newgroup
+
+    def update(self, instance, validated_data) :
+        instance.group_users.add(validated_data.pop('user_name'))
