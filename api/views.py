@@ -47,3 +47,19 @@ class GroupViewSet(viewsets.ModelViewSet) :
             return HttpResponse("created")
         except Exception as e :
             return HttpResponseBadRequest(str(e))
+
+class JoinViewSet(viewsets.ModelViewSet) :
+    serializer_class = GroupSerializer
+    queryset = Group.objects.all()
+
+    def create(self, request, *args, **kwargs) :
+        data = {}
+        try :
+            group = Group.objects.filter(group_id=request.data['group_id'])
+            user_id = User.objects.filter(user_name=request.data['user_name'])[0]
+            data['user_id'] = user_id
+            data['group_id'] = group[0]
+            GroupSerializer.update(self, group, validated_data=data)
+            return HttpResponse("joined")
+        except Exception as e :
+            return HttpResponseBadRequest(str(e))
