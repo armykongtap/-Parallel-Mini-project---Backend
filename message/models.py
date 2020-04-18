@@ -5,8 +5,8 @@ from group.models import Group
 class Message(models.Model) :
     msg_id = models.AutoField(primary_key=True)
     msg_text = models.CharField(max_length=100)
-    msg_sender = models.OneToOneField(User, related_name='message_sender', on_delete=models.CASCADE)
-    msg_group = models.OneToOneField(Group, related_name='group', on_delete=models.CASCADE)
+    msg_sender = models.ForeignKey(User, related_name='message_sender', on_delete=models.CASCADE)
+    msg_group = models.ForeignKey(Group, related_name='group', on_delete=models.CASCADE)
     msg_timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) :

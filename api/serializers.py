@@ -17,16 +17,15 @@ class GroupSerializer(serializers.ModelSerializer) :
         fields = '__all__'
 
     def create(self, validated_data) :
-        newgroup = Group.objects.create(group_name=validated_data.pop('group_name'))
-        user = validated_data.pop('group_users')
-        newgroup.group_users.set(user)
+        text = validated_data.pop('group_name').split("%_%")
+        newgroup = Group.objects.create(group_name=text[0])
+        user = User.objects.get(user_name=text[1])
         newgroup.save()
-        user[0].user_group.add(newgroup)
+        user.user_group.add(newgroup)
         return newgroup
 
     def update(self, instance, validated_data) :
         user = validated_data.pop('user_id')
-        instance.first().group_users.add(user)
         user.user_group.add(validated_data.pop('group_id'))
 
 class MessageSerializer(serializers.ModelSerializer) :
@@ -35,8 +34,8 @@ class MessageSerializer(serializers.ModelSerializer) :
         fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer) :
-    user_group = GroupSerializer(many=True)
-    user_recent_message = MessageSerializer(many=True)
+    user_group = GroupSerializer(many=True, required=False)
+    user_recent_message = MessageSerializer(many=True, required=False)
 
     class Meta :
         model = User
