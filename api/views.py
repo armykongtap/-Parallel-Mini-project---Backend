@@ -55,7 +55,10 @@ class GroupViewSet(viewsets.ModelViewSet) :
 
     def create(self, request, *args, **kwargs) :
         data = {}
-        text = request.data['group_name'] + "%_%" + request.data['user_name']
+        if type(request.data) == list :
+            text = request.data[0]['group_name'] + "%_%" + request.data[0]['user_name']
+        else :
+            text = request.data['group_name'] + "%_%" + request.data['user_name']
         data['group_name'] = text
         try :
             serializer = self.get_serializer(data=data)
