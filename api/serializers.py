@@ -9,22 +9,13 @@ from drf_writable_nested.mixins import UniqueFieldsMixin, NestedUpdateMixin
 # Import App Models
 from user.models import User
 from group.models import Group
-
-class UserSerializer(serializers.ModelSerializer) :
-    class Meta :
-        model = User
-        fields = '__all__'
-
-    def create(self, validated_data) :
-        newuser = User.objects.create(user_name=validated_data.pop('user_name'))
-        newuser.save()
-        return newuser
+from message.models import Message
 
 class GroupSerializer(serializers.ModelSerializer) :
     class Meta :
         model = Group
         fields = '__all__'
-    
+
     def create(self, validated_data) :
         newgroup = Group.objects.create(group_name=validated_data.pop('group_name'))
         user = validated_data.pop('group_users')
@@ -36,4 +27,22 @@ class GroupSerializer(serializers.ModelSerializer) :
     def update(self, instance, validated_data) :
         user = validated_data.pop('user_id')
         instance.first().group_users.add(user)
-        user.user_group.add(validated_data.pop('group_id'))     
+        user.user_group.add(validated_data.pop('group_id'))
+
+class MessageSerializer(serializers.ModelSerializer) :
+    class Meta :
+        model = Message
+        fields = '__all__'
+
+class UserSerializer(serializers.ModelSerializer) :
+    user_group = GroupSerializer(many=True)
+    user_recent_message = MessageSerializer(many=True)
+
+    class Meta :
+        model = User
+        fields = '__all__'
+
+    def create(self, validated_data) :
+        newuser = User.objects.create(user_name=validated_data.pop('user_name'))
+        newuser.save()
+        return newuser

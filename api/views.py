@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from rest_framework.response import Response
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 
 from .serializers import UserSerializer, GroupSerializer
 
@@ -63,3 +63,10 @@ class JoinViewSet(viewsets.ModelViewSet) :
             return HttpResponse("joined")
         except Exception as e :
             return HttpResponseBadRequest(str(e))
+
+class GetUserViewSet(viewsets.ModelViewSet) :
+    serializer_class = UserSerializer
+
+    def get_queryset(self) :
+        user = User.objects.filter(user_name=self.request.data['user_name'])
+        return user
