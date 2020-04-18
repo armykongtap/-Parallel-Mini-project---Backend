@@ -87,3 +87,20 @@ class DeleteGroupViewSet(viewsets.ModelViewSet) :
             return HttpResponse("deleted")
         except Exception as e :
             return HttpResponseBadRequest(str(e))
+
+class LeaveGroupViewSet(viewsets.ModelViewSet) :
+    def create(self, request, *args, **kwargs) :
+        username = request.data['user_name']
+        gid = request.data['group_id']
+
+        #Check if user is in the group
+        usergroup = User.objects.filter(user_name=username).values_list('user_group', flat=True)
+        if gid not in usergroup :
+            return HttpResponseBadRequest("User is not in this group / Group does not exist!")
+
+        try :
+            user = User.objects.get(user_name=username)
+            user.user_group.remove(gid)
+            return HttpResponse("left the group")
+        except Exception as e :
+            return HttpResponseBadRequest(str(e))
