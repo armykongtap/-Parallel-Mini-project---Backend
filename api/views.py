@@ -55,9 +55,7 @@ class GroupViewSet(viewsets.ModelViewSet) :
 
     def create(self, request, *args, **kwargs) :
         data = {}
-        user_id = User.objects.filter(user_name=request.data['user_name']).values_list('user_id', flat=True)[0]
         text = request.data['group_name'] + "%_%" + request.data['user_name']
-        print(text)
         data['group_name'] = text
         try :
             serializer = self.get_serializer(data=data)
