@@ -1,7 +1,9 @@
 from django.shortcuts import render
+from django.core import serializers
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from rest_framework.response import Response
 from rest_framework import viewsets, filters
+import json
 
 from .serializers import UserSerializer, GroupSerializer
 
@@ -33,7 +35,23 @@ class LoginViewSet(viewsets.ModelViewSet) :
 
 class GroupViewSet(viewsets.ModelViewSet) :
     serializer_class = GroupSerializer
-    queryset = Group.objects.all()
+
+    def list(self, request) :
+        user_name = request.data['user_name']
+        
+        #Get all groups
+        if user_name == "__all__" :
+            return HttpResponse(serializers.serialize('json', Group.objects.all()), content_type="application/json")
+
+        query = []
+        user = User.objects.get(user_name=user_name)
+        query = list(user.user_group.all().values())
+        for i in query :
+            gid = i['group_id']
+            groupset = User.objects.filter(user_group=gid).values_list('user_name', flat=True)
+            i['group_user'] = list(groupset)
+        return HttpResponse(json.dumps(query), content_type="application/json")
+
 
     def create(self, request, *args, **kwargs) :
         data = {}
