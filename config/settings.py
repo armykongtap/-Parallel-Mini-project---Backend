@@ -39,10 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'channels',
 
     'message.apps.MessageConfig',
     'user.apps.UserConfig',
-    'group.apps.GroupConfig'
+    'group.apps.GroupConfig',
+    'chat',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +130,14 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+# channel
+ASGI_APPLICATION = 'config.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
