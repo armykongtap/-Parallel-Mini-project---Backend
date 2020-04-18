@@ -33,12 +33,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json['msg']
-        groupId = text_data_json['group_id']
-        userId = text_data_json['user_id']
+        msg = text_data_json['msg']
+        group_id = text_data_json['group_id']
+        user_id = text_data_json['user_id']
 
-        Message(msg_text=message, msg_sender=User.objects.get(
-            pk=userId), msg_group=Group.objects.get(pk=groupId)).save()
+        Message(msg_text=msg, msg_sender=User.objects.get(
+            pk=user_id), msg_group=Group.objects.get(pk=group_id)).save()
 
         # Send message to room group
         text_data_json['type'] = 'chat_message'
