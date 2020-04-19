@@ -14,7 +14,7 @@ class ChatConsumer(WebsocketConsumer):
             {
                 'type': 'chat_message',
                 'msg_text': m.msg_text,
-                'user_id': m.msg_sender.user_id,
+                'user_name': m.msg_sender.user_name,
                 'time_stamp': m.msg_timestamp.timestamp()
             }
         )
@@ -34,7 +34,6 @@ class ChatConsumer(WebsocketConsumer):
         self.accept()
 
         intMessage = Message.objects.filter(msg_group_id=self.group_id)
-        print(type(intMessage))
         for m in intMessage[Message.objects.count()-10:]:
             self.send_MessageModel_to_group(m)
 
@@ -49,10 +48,10 @@ class ChatConsumer(WebsocketConsumer):
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         msg_text = text_data_json['msg_text']
-        user_id = text_data_json['user_id']
+        user_name = text_data_json['user_name']
 
         m = Message(msg_text=msg_text, msg_sender=User.objects.get(
-            pk=user_id), msg_group=Group.objects.get(pk=self.group_id))
+            user_name=user_name), msg_group=Group.objects.get(pk=self.group_id))
         m.save()
 
         # Send message to room group
@@ -61,12 +60,12 @@ class ChatConsumer(WebsocketConsumer):
     # Receive message from room group
     def chat_message(self, event):
         msg_text = event['msg_text']
-        user_id = event['user_id']
+        user_name = event['user_name']
         time_stamp = event['time_stamp']
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
             'msg_text': msg_text,
-            'user_id': user_id,
+            'user_name': user_name,
             'time_stamp': time_stamp,
         }))
