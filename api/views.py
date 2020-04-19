@@ -17,7 +17,10 @@ class LoginViewSet(viewsets.ModelViewSet) :
 
     def create(self, request, *args, **kwargs) :
         data = {}
-        username = request.data['user_name']
+        if type(request.data) == list :
+            username = request.data[0]['user_name']
+        else :
+            username = request.data['user_name']
         data['user_name'] = username
 
         #Register Case
@@ -37,7 +40,10 @@ class GroupViewSet(viewsets.ModelViewSet) :
     serializer_class = GroupSerializer
 
     def list(self, request) :
-        user_name = request.data['user_name']
+        if type(request.data) == list :
+            user_name = request.data[0]['user_name']
+        else :
+            user_name = request.data['user_name']
         
         #Get all groups
         if user_name == "__all__" :
@@ -75,8 +81,12 @@ class JoinViewSet(viewsets.ModelViewSet) :
     def create(self, request, *args, **kwargs) :
         data = {}
         try :
-            group = Group.objects.filter(group_id=request.data['group_id'])
-            user_id = User.objects.filter(user_name=request.data['user_name'])[0]
+            if type(request.data) == list :
+                group = Group.objects.filter(group_id=request.data[0]['group_id'])
+                user_id = User.objects.filter(user_name=request.data[0]['user_name'])[0]
+            else :
+                group = Group.objects.filter(group_id=request.data['group_id'])
+                user_id = User.objects.filter(user_name=request.data['user_name'])[0]
             data['user_id'] = user_id
             data['group_id'] = group[0]
             GroupSerializer.update(self, group, validated_data=data)
@@ -88,13 +98,20 @@ class GetUserViewSet(viewsets.ModelViewSet) :
     serializer_class = UserSerializer
 
     def get_queryset(self) :
-        user = User.objects.filter(user_name=self.request.data['user_name'])
+        if type(request.data) == list :
+            user = User.objects.filter(user_name=self.request.data[0]['user_name'])
+        else :
+            user = User.objects.filter(user_name=self.request.data['user_name'])
         return user
 
 class DeleteGroupViewSet(viewsets.ModelViewSet) :
     def create(self, request, *args, **kwargs) :
-        username = request.data['user_name']
-        gid = request.data['group_id']
+        if type(request.data) == list :
+            username = request.data[0]['user_name']
+            gid = request.data[0]['group_id']
+        else :
+            username = request.data['user_name']
+            gid = request.data['group_id']
 
         #Check if user is in the group
         usergroup = User.objects.filter(user_name=username).values_list('user_group', flat=True)
@@ -109,8 +126,12 @@ class DeleteGroupViewSet(viewsets.ModelViewSet) :
 
 class LeaveGroupViewSet(viewsets.ModelViewSet) :
     def create(self, request, *args, **kwargs) :
-        username = request.data['user_name']
-        gid = request.data['group_id']
+        if type(request.data) == list :
+            username = request.data[0]['user_name']
+            gid = request.data[0]['group_id']
+        else :
+            username = request.data['user_name']
+            gid = request.data['group_id']
 
         #Check if user is in the group
         usergroup = User.objects.filter(user_name=username).values_list('user_group', flat=True)
