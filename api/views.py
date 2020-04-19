@@ -5,10 +5,11 @@ from rest_framework.response import Response
 from rest_framework import viewsets, filters
 import json
 
-from .serializers import UserSerializer, GroupSerializer
+from .serializers import UserSerializer, GroupSerializer, MessageSerializer
 
 from user.models import User
 from group.models import Group
+from message.models import Message
 
 
 class LoginViewSet(viewsets.ModelViewSet) :
@@ -144,3 +145,41 @@ class LeaveGroupViewSet(viewsets.ModelViewSet) :
             return HttpResponse("left the group")
         except Exception as e :
             return HttpResponseBadRequest(str(e))
+
+class GetXMessageViewSet(viewsets.ModelViewSet) :
+    serializer_class = MessageSerializer
+
+    def get_queryset(self) :
+        if type(self.request.data) == list :
+            gid = self.request.data[0]['group_id']
+            amount = self.request.data[0]['amount']
+        else :
+            gid = self.request.data['group_id']
+            amount = self.request.data['amount']
+        queryset = Message.objects.all()
+
+        #Default case
+        if gid == "__all__" :
+            return queryset
+        
+        queryset = queryset.filter(msg_group_id=gid).order_by('-msg_timestamp')[:amount]
+        return queryset[::-1]
+
+class SendMessageViewSet(viewsets.ModelViewSet) :
+    serializer_class = MessageSerializer
+    queryset = Message.objects.all()
+
+    def create(self, request, *args, **kwargs) :
+        if type(request.data) == list :
+            username = request.data[0]['user_name']
+            gid = request.data[0]['group_id']
+            msg = request.data[0]['msg']
+        else :
+            username = request.data['user_name']
+            gid = request.data['group_id']
+            msg = request.data['msg']
+
+        #Check if user is in the group
+        usergroup = User.objects.filter(user_name=username).values_list('user_group', flat=True)
+        if gid not in usergroup :
+            return HttpResponseBadRequest("User is not in this group / Group does not exist!")
