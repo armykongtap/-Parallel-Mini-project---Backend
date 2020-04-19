@@ -2,8 +2,6 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 
-from rest_framework.parsers import JSONParser
-
 from user.models import User
 from group.models import Group
 from message.models import Message
@@ -30,19 +28,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     # Receive message from WebSocket
-    @sync_to_async
-    def receive(self, text_data):
+    # @sync_to_async
+    async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        msg = text_data_json['msg']
-        group_id = text_data_json['group_id']
+        message = text_data_json['message']
         user_id = text_data_json['user_id']
+        group_id = text_data_json['group_id']
 
-        Message(msg_text=msg, msg_sender=User.objects.get(
-            pk=user_id), msg_group=Group.objects.get(pk=group_id)).save()
+        # Message(msg_text=message, msg_sender=User.objects.get(
+        #     pk=user_id), msg_group=Group.objects.get(pk=group_id)).save()
 
         # Send message to room group
-        text_data_json['type'] = 'chat_message'
-        self.channel_layer.group_send(self.room_group_name, text_data_json)
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'chat_message',
+                'message': message
+            }
+        )
 
     # Receive message from room group
     async def chat_message(self, event):
