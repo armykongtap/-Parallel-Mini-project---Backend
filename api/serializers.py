@@ -25,7 +25,7 @@ class GroupSerializer(serializers.ModelSerializer) :
         return newgroup
 
     def update(self, instance, validated_data) :
-        user = validated_data.pop('user_id')
+        user = validated_data.pop('user_name')
         user.user_group.add(validated_data.pop('group_id'))
 
 class MessageSerializer(serializers.ModelSerializer) :

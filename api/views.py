@@ -34,7 +34,6 @@ class LoginViewSet(viewsets.ModelViewSet) :
         #Retrieve Existing User
         user = User.objects.filter(user_name=username)
         jsondata = {}
-        jsondata['user_id'] = user.values_list('user_id', flat=True)[0]
         jsondata['user_name'] = user.values_list('user_name', flat=True)[0]
         return JsonResponse(jsondata)
 
@@ -85,11 +84,11 @@ class JoinViewSet(viewsets.ModelViewSet) :
         try :
             if type(request.data) == list :
                 group = Group.objects.filter(group_id=request.data[0]['group_id'])
-                user_id = User.objects.filter(user_name=request.data[0]['user_name'])[0]
+                user_name = User.objects.filter(user_name=request.data[0]['user_name'])[0]
             else :
                 group = Group.objects.filter(group_id=request.data['group_id'])
-                user_id = User.objects.filter(user_name=request.data['user_name'])[0]
-            data['user_id'] = user_id
+                user_name = User.objects.filter(user_name=request.data['user_name'])[0]
+            data['user_name'] = user_name
             data['group_id'] = group[0]
             GroupSerializer.update(self, group, validated_data=data)
             return HttpResponse("joined")
@@ -166,6 +165,11 @@ class GetXMessageViewSet(viewsets.ModelViewSet) :
         queryset = queryset.filter(msg_group_id=gid).order_by('-msg_timestamp')[:amount]
         qs = list(queryset[::-1])
         for i in qs :
+            #Username
+            # name = i.msg_sender.user_name
+            # i.msg_sender_2 = name
+
+            #Time slice
             time = timezone('Asia/Bangkok').localize(i.msg_timestamp).strftime("%H:%M")
             i.msg_timestamp = time
         return qs
