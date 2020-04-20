@@ -12,9 +12,10 @@ class ChatConsumer(WebsocketConsumer):
     def message_to_dict(self, m):
         return({
             'type': 'chat_message',
+            'msg_id': m.msg_id,
             'msg_text': m.msg_text,
             'user_name': m.msg_sender.user_name,
-            'time_stamp': m.msg_timestamp.timestamp()
+            'time_stamp': m.msg_timestamp.strftime("%H:%M")
         })
 
     # -------------------------------------------------------------
@@ -63,12 +64,14 @@ class ChatConsumer(WebsocketConsumer):
     # Receive message from room group
 
     def chat_message(self, event):
+        msg_id = event['msg_id']
         msg_text = event['msg_text']
         user_name = event['user_name']
         time_stamp = event['time_stamp']
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
+            'msg_id': msg_id,
             'msg_text': msg_text,
             'user_name': user_name,
             'time_stamp': time_stamp,
