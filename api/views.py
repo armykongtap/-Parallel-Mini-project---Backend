@@ -164,22 +164,3 @@ class GetXMessageViewSet(viewsets.ModelViewSet) :
         
         queryset = queryset.filter(msg_group_id=gid).order_by('-msg_timestamp')[:amount]
         return queryset[::-1]
-
-class SendMessageViewSet(viewsets.ModelViewSet) :
-    serializer_class = MessageSerializer
-    queryset = Message.objects.all()
-
-    def create(self, request, *args, **kwargs) :
-        if type(request.data) == list :
-            username = request.data[0]['user_name']
-            gid = request.data[0]['group_id']
-            msg = request.data[0]['msg']
-        else :
-            username = request.data['user_name']
-            gid = request.data['group_id']
-            msg = request.data['msg']
-
-        #Check if user is in the group
-        usergroup = User.objects.filter(user_name=username).values_list('user_group', flat=True)
-        if gid not in usergroup :
-            return HttpResponseBadRequest("User is not in this group / Group does not exist!")

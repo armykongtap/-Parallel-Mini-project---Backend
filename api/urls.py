@@ -12,6 +12,5 @@ router.register(r'getuser', GetUserViewSet, basename='get_users_group')
 router.register(r'delete', DeleteGroupViewSet, basename='delete_group')
 router.register(r'leave', LeaveGroupViewSet, basename='leave_group')
 router.register(r'message', GetXMessageViewSet, basename='get_x_messages')
-router.register(r'send', SendMessageViewSet, basename='send_message')
 
 urlpatterns = router.urls
