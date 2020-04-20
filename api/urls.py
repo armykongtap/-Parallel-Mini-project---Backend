@@ -1,8 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import LoginViewSet, GroupViewSet, JoinViewSet, GetUserViewSet, DeleteGroupViewSet, LeaveGroupViewSet, GetXMessageViewSet, \
-    SendMessageViewSet
+from .views import LoginViewSet, GroupViewSet, JoinViewSet, GetUserViewSet, DeleteGroupViewSet, LeaveGroupViewSet, GetXMessageViewSet
 
 router = DefaultRouter()
 router.register(r'login', LoginViewSet, basename='login')
