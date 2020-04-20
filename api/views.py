@@ -3,6 +3,7 @@ from django.core import serializers
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from rest_framework.response import Response
 from rest_framework import viewsets, filters
+from pytz import timezone
 import json
 
 from .serializers import UserSerializer, GroupSerializer, MessageSerializer
@@ -163,4 +164,8 @@ class GetXMessageViewSet(viewsets.ModelViewSet) :
             return queryset
         
         queryset = queryset.filter(msg_group_id=gid).order_by('-msg_timestamp')[:amount]
-        return queryset[::-1]
+        qs = list(queryset[::-1])
+        for i in qs :
+            time = timezone('Asia/Bangkok').localize(i.msg_timestamp).strftime("%H:%M")
+            i.msg_timestamp = time
+        return qs
