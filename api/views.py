@@ -165,11 +165,56 @@ class GetXMessageViewSet(viewsets.ModelViewSet) :
         queryset = queryset.filter(msg_group_id=gid).order_by('-msg_timestamp')[:amount]
         qs = list(queryset[::-1])
         for i in qs :
-            #Username
-            # name = i.msg_sender.user_name
-            # i.msg_sender_2 = name
-
             #Time slice
             time = timezone('Asia/Bangkok').localize(i.msg_timestamp).strftime("%H:%M")
             i.msg_timestamp = time
         return qs
+
+class RecentMessageViewSet(viewsets.ModelViewSet) :
+    serializer_class = UserSerializer
+
+    def list(self, request) :
+        if type(request.data) == list :
+            user_name = request.data[0]['user_name']
+            gid = request.data[0]['group_id']
+        else :
+            user_name = request.data['user_name']
+            gid = request.data['group_id']
+
+        try :
+            query = {}
+            query['user_name'] = user_name
+            query['group_id'] = gid
+            getmsg = User.objects.get(user_name=user_name).user_recent_message.filter(msg_group=gid)
+            if getmsg.exists() :
+                query['msg_id'] = getmsg[0].msg_id
+            else : 
+                query['msg_id'] = 0
+            return HttpResponse(json.dumps(query), content_type="application/json")
+        except Exception as e :
+            return HttpResponseBadRequest(str(e))
+
+    def create(self, request, *args, **kwargs) :
+        if type(request.data) == list :
+            user_name = request.data[0]['user_name']
+            gid = request.data[0]['group_id']
+            msg_id = request.data[0]['msg_id']
+        else :
+            user_name = request.data['user_name']
+            gid = request.data['group_id']
+            msg_id = request.data['msg_id']
+        
+        try :
+            user = User.objects.get(user_name=user_name)
+            newmsg = Message.objects.get(msg_id=msg_id)
+            getmsg = user.user_recent_message.filter(msg_group=gid)
+            if newmsg.msg_group.group_id == gid :
+                if getmsg.exists() :
+                    rm = user.user_recent_message.get(msg_group=gid)
+                    user.user_recent_message.remove(rm) 
+                user.user_recent_message.add(newmsg)
+                return HttpResponse("updated")
+            return HttpResponseBadRequest("not updated (group_id or msg_id is incorrect)")
+        except Exception as e :
+            return HttpResponseBadRequest(str(e))
+        
