@@ -33,6 +33,14 @@ class ChatConsumer(WebsocketConsumer):
 
         self.accept()
 
+        initMessage = Message.objects.filter(msg_group_id=self.group_id)
+        if (Message.objects.count() >= 100):
+            n = Message.objects.count()-100
+        else:
+            n = 0
+        for m in initMessage[n:]:
+            self.send(text_data=json.dumps(self.message_to_dict(m)))
+
     def disconnect(self, close_code):
         # Leave room group
         async_to_sync(self.channel_layer.group_discard)(
