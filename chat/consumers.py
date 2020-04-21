@@ -64,8 +64,8 @@ class ChatConsumer(WebsocketConsumer):
             self.get_recent_message()))
 
         initMessage = Message.objects.filter(msg_group_id=self.group_id)
-        if (initMessage.count() > 10):
-            n = initMessage.count()-10
+        if (initMessage.count() > 100):
+            n = initMessage.count()-100
         else:
             n = 0
         for m in initMessage[n:]:
