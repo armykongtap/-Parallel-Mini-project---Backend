@@ -41,10 +41,7 @@ class GroupViewSet(viewsets.ModelViewSet) :
     serializer_class = GroupSerializer
 
     def list(self, request) :
-        if type(request.data) == list :
-            user_name = request.data[0]['user_name']
-        else :
-            user_name = request.data['user_name']
+        user_name = request.query_params.get('user_name')
         
         #Get all groups
         if user_name == "__all__" :
@@ -150,12 +147,8 @@ class GetXMessageViewSet(viewsets.ModelViewSet) :
     serializer_class = MessageSerializer
 
     def get_queryset(self) :
-        if type(self.request.data) == list :
-            gid = self.request.data[0]['group_id']
-            amount = self.request.data[0]['amount']
-        else :
-            gid = self.request.data['group_id']
-            amount = self.request.data['amount']
+        gid = self.request.query_params.get('group_id')
+        amount = int(self.request.query_params.get('amount'))
         queryset = Message.objects.all()
 
         #Default case
@@ -174,12 +167,8 @@ class RecentMessageViewSet(viewsets.ModelViewSet) :
     serializer_class = UserSerializer
 
     def list(self, request) :
-        if type(request.data) == list :
-            user_name = request.data[0]['user_name']
-            gid = request.data[0]['group_id']
-        else :
-            user_name = request.data['user_name']
-            gid = request.data['group_id']
+        user_name = request.query_params.get('user_name')
+        gid = request.query_params.get('group_id')
 
         try :
             query = {}
