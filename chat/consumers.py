@@ -36,6 +36,7 @@ class ChatConsumer(WebsocketConsumer):
 
     def get_recent_message(self):
         query = {}
+        query['type'] = 'initial'
         query['user_name'] = self.user_name
         query['group_id'] = self.group_id
         getmsg = User.objects.get(
@@ -106,6 +107,7 @@ class ChatConsumer(WebsocketConsumer):
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
+            'type': 'chat_message',
             'msg_id': msg_id,
             'msg_text': msg_text,
             'user_name': user_name,
