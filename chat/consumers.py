@@ -34,19 +34,6 @@ class ChatConsumer(WebsocketConsumer):
             else:
                 user.user_recent_message.add(newmsg)
 
-    def get_recent_message(self):
-        query = {}
-        query['type'] = 'initial'
-        query['user_name'] = self.user_name
-        query['group_id'] = self.group_id
-        getmsg = User.objects.get(
-            user_name=self.user_name).user_recent_message.filter(msg_group=self.group_id)
-        if getmsg.exists():
-            query['recent_msg_id'] = getmsg[0].msg_id
-        else:
-            query['recent_msg_id'] = 0
-        return query
-
     # -------------------------------------------------------------
 
     def connect(self):
@@ -61,19 +48,38 @@ class ChatConsumer(WebsocketConsumer):
         )
         self.accept()
 
-        self.send(text_data=json.dumps(
-            self.get_recent_message()))
+        getmsg = User.objects.get(
+            user_name=self.user_name).user_recent_message.filter(msg_group=self.group_id)
+        if getmsg.exists():
+            recent_msg_id = getmsg[0].msg_id
+        else:
+            recent_msg_id = 0
 
-        initMessage = Message.objects.filter(msg_group_id=self.group_id)
-        if (initMessage.count() > 100):
-            n = initMessage.count()-100
+        prevMessage = Message.objects.filter(msg_group_id=self.group_id)
+
+        if prevMessage.exists():
+            last_msg_id = prevMessage[prevMessage.count()-1].msg_id
+        else:
+            last_msg_id = 0
+
+        self.send(text_data=json.dumps({
+            'type': 'initial',
+            'user_name': self.user_name,
+            'group_id': self.group_id,
+            'recent_msg_id': recent_msg_id,
+            'last_msg_id': last_msg_id
+
+        }))
+
+        if (prevMessage.count() > 100):
+            n = prevMessage.count()-100
         else:
             n = 0
-        for m in initMessage[n:]:
+        for m in prevMessage[n:]:
             self.send(text_data=json.dumps(self.message_to_dict(m)))
-        if initMessage.count() > 0:
+        if prevMessage.count() > 0:
             self.update_recent_message(
-                initMessage[initMessage.count()-1].msg_id)
+                prevMessage[prevMessage.count()-1].msg_id)
 
     def disconnect(self, close_code):
         self.online_user.discard(
